@@ -37,12 +37,12 @@ To prevent cross-subject information leakage, the model’s internal memory stat
 
 We tested the Swin-Tiny and Swin-Small variants on the Kinetics-400 dataset using 32×224×224 clips and batch size 1. Approximate VRAM usage observed:
 
-| Scenario | VRAM Required |
-|---|---|
-| **Inference – Swin-Tiny** | ~2.5 – 3.5 GB |
-| **Inference – Swin-Small** | ~3.5 – 5.0 GB |
-| **Training – Swin-Tiny (AMP + checkpointing)** | ~4 – 6 GB |
-| **Training – Swin-Small (AMP + checkpointing)** | ~7 – 9 GB |
+| Scenario | VRAM Required         |
+|---|-----------------------|
+| **Inference – Swin-Tiny** | ~2.5 – 3.5 GB per SOW |
+| **Inference – Swin-Small** | ~3.5 – 5.0 GB per SOW |
+| **Training – Swin-Tiny (AMP + checkpointing)** | ~4 – 6 GB             |
+| **Training – Swin-Small (AMP + checkpointing)** | ~7 – 9 GB             |
 
 These findings indicate that even standard consumer GPUs with **8–12 GB VRAM** are sufficient for both training and extended-duration inference.
 
