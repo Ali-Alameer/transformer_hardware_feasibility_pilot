@@ -23,9 +23,9 @@ $ wget https://github.com/SwinTransformer/storage/releases/download/v1.0.4/swin_
 $ cd ..
 ```
 
-### Long-Duration Operation (30+ Minutes)
+### Assumptions Long-Duration Operation (30+ Minutes)
 
-With this architecture, I successfully classify sleep stage behaviour continuously over periods of 30 minutes and beyond. Importantly, due to the capped memory mechanism, GPU VRAM requirements remain constant, irrespective of total video duration. This enables deployment in real-world farm monitoring setups where multi-hour recordings are common.
+With this architecture, we successfully classify sleep stage behaviour continuously over periods of 30 minutes and beyond. Importantly, due to the capped memory mechanism, GPU VRAM requirements remain constant, irrespective of total video duration. This enables deployment in real-world farm monitoring setups where multi-hour recordings are common.
 
 
 ### Memory Reset Protocol
