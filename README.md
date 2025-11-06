@@ -5,7 +5,7 @@ This repo is a simple usage of the official implementation ["Video Swin Transfor
 
 ## Introduction
 
-**Video Swin Transformer** is initially described in ["Video Swin Transformer"](https://arxiv.org/abs/2106.13230), which advocates an inductive bias of locality in video Transformers, leading to a better speed-accuracy trade-off compared to previous approaches which compute self-attention globally even with spatial-temporal factorization. The locality of the proposed video architecture is realized by adapting the Swin Transformer designed for the image domain, while continuing to leverage the power of pre-trained image models. Our approach achieves state-of-the-art accuracy on a broad range of video recognition benchmarks, including action recognition (`84.9` top-1 accuracy on Kinetics-400 and `86.1` top-1 accuracy on Kinetics-600 with `~20x` less pre-training data and `~3x` smaller model size) and temporal modeling (`69.6` top-1 accuracy on Something-Something v2).
+The Video Swin Transformer (VST) architecture has achieved state-of-the-art performance across multiple video recognition benchmarks, including action recognition (84.9% top-1 accuracy on Kinetics-400) and temporal modeling (69.6% top-1 accuracy on Something-Something v2). This repository provides a hardware implementation demonstrating that this type of transformer architecture effectively scales to process objects in long-duration videos of up to 30 minutes. The accompanying calculations and optional logs verify that the model can efficiently handle 30-minute video sequences per object, forming the basis for the VRAM utilization and parallel processing analysis outlined in our research proposal.
 
 ## Usage
 
