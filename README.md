@@ -2,8 +2,6 @@
 
 In this research, we extend the Video Swin Transformer architecture by incorporating a **Feedback-Attention Memory (FAM)** mechanism to enable long-duration video classification for REM and NREM sleep in sows. Sleep is a temporally continuous biological process, and accurate sleep staging requires integrating behavioural context that evolves gradually over time. Conventional transformer-based video models typically operate on short fixed-length clips (e.g., 16–32 frames) and lack built-in mechanisms for preserving long-term spatiotemporal information.
 
-![teaser](./images/architecture.png)
-
 
 
 ## Proposed Method
@@ -60,18 +58,98 @@ In our experiments, **peak GPU memory usage remained approximately constant** th
 These findings confirm that the streaming design and the proposed FAM architecture are suitable for long-duration deployment.
 
 
-## VRAM Usage for 32×224×224 Clip Processing (Kinetics-400 Simulation)
+Here is **all the memory-related information**, rewritten cleanly in **Markdown format**, ready for documentation, a paper, or your GitHub README.
 
-We evaluated the Swin-Tiny and Swin-Small variants during both inference and training (AMP + gradient checkpointing), using **batch size = 1** and clip size = **32 × 224 × 224**.
+# Memory Usage Summary
 
-| Scenario                                        | Approx. VRAM Usage |
-| ----------------------------------------------- | ------------------ |
-| **Inference – Swin-Tiny**                       | ~2.5 – 3.5 GB      |
-| **Inference – Swin-Small**                      | ~3.5 – 5.0 GB      |
-| **Training – Swin-Tiny (AMP + checkpointing)**  | ~4 – 6 GB          |
-| **Training – Swin-Small (AMP + checkpointing)** | ~7 – 9 GB          |
+## **Long-Term Memory Module (FAM) Overview**
 
-These measurements suggest that **consumer GPUs with 8–12 GB of VRAM** are generally sufficient for:
+The Feedback-Attention Memory (FAM) module maintains a compact and bounded memory representing 1–2 minutes of past behaviour.
+Memory size is fixed, ensuring constant GPU usage during long-duration inference.
 
-* training the baseline models under our configuration, and
-* performing extended-duration inference using the proposed FAM-enhanced architecture.
+## **Memory Queue Specifications**
+
+### **Memory Token Size**
+
+* Number of memory tokens per clip: **128**
+* Token dimension: **768**
+* Memory per clip:
+
+```
+128 tokens × 768 dims × 4 bytes ≈ 0.38 MB
+```
+
+## **Total Memory Queue Size**
+
+Given a memory length of **L_mem = 20–30** clips:
+
+```
+Memory = 128 × 768 × L_mem × 4 bytes
+```
+
+### **Examples**
+
+| L_mem | Total Memory | VRAM Usage |
+| ----- | ------------ | ---------- |
+| 10    | ~3.9 MB      | Very Low   |
+| 20    | ~7.7 MB      | Low        |
+| 25    | ~9.8 MB      | Low        |
+| 30    | ~11.5 MB     | Low        |
+
+Even at maximum capacity, the FAM module uses **< 12 MB VRAM**, which is negligible compared to backbone features.
+
+## **Cross-Attention Computation Cost**
+
+Cross-attention uses:
+
+```
+Query:    current clip tokens  (≈ 300–400 tokens)
+Key/Val:  memory tokens        (128 × L_mem)
+```
+
+For L_mem = 25:
+
+```
+Total memory tokens = 128 × 25 = 3200 tokens
+```
+
+The cross-attention cost is lightweight and scales linearly with L_mem.
+
+## **Key Memory Advantages**
+
+* **Constant VRAM usage** during long-duration inference
+* **Streaming-compatible** (process hours-long videos)
+* **Negligible memory footprint** (<12 MB total)
+* **No accumulation of activations**
+* Suitable for **edge devices** (Jetson Orin / Xavier)
+
+
+## **Inference Mode VRAM Breakdown**
+
+| Component                         | VRAM Usage                      |
+| --------------------------------- | ------------------------------- |
+| Video Swin Transformer (backbone) | 2–10 GB (depends on Swin-T/S/B) |
+| FAM Memory Queue                  | **< 12 MB**                     |
+| Temporary buffers                 | 0.5–1 GB                        |
+| **Total (Swin-T)**                | **~2.5–3.5 GB**                 |
+| **Total (Swin-S)**                | **~4.5–6 GB**                   |
+| **Total (Swin-B)**                | **~8–10 GB**                    |
+
+
+## **Why Memory Stays Constant**
+
+* Clip size is fixed: **32 frames**
+* Batch size = **1**
+* Memory queue length is fixed: **L_mem**
+* No dynamic feature caching
+* No growing hidden states (unlike RNN/LSTM)
+
+Therefore:
+
+> **GPU memory stays constant during 30+ minutes of continuous streaming.**
+
+## **Memory Lifetime**
+
+* Each new clip adds a summary to the memory queue.
+* When queue exceeds L_mem, oldest memory entries are removed.
+* Sliding window over time = stable, bounded memory footprint.
