@@ -29,21 +29,6 @@ This design introduces long-range temporal continuity similar to recurrent memor
 * Its maximum size is fixed (`L_mem`), ensuring **predictable and bounded VRAM usage**.
 * Because clip shape and memory size remain constant, the model supports inference over **arbitrarily long video streams (e.g., ≥30 minutes)** without unbounded GPU memory growth.
 
-## Clip and Sampling Strategy
-
-Behavioural transitions in long-duration monitoring tasks typically evolve gradually; therefore, high frame rates are unnecessary. Empirically, a sampling rate of **2–4 FPS** captures essential cues such as posture changes, movement intensity, and prolonged inactivity.
-
-### Overlap and Temporal Resolution
-
-* Clips advance using a **stride of 8 frames**, resulting in **75% overlap**.
-* With a clip size of 32 frames, this yields classification updates every:
-
-  * **2 seconds at 4 FPS**
-  * **4 seconds at 2 FPS**
-
-This configuration provides fine-grained temporal resolution while keeping inference costs manageable.
-
-
 ## Long-Duration Operation (30+ Minutes)
 
 To evaluate long-stream performance, we simulated extended video sequences by **concatenating Kinetics-400 clips** into continuous ~30-minute streams. The model processed these streams using a **fixed-length sliding window** of 32 frames per forward pass.
@@ -57,25 +42,6 @@ Peak GPU memory usage remained approximately constant throughout the entire 30-m
 * memory queue length `L_mem` was bounded.
 
 These findings confirm that the streaming design and the proposed FAM architecture are suitable for **long-duration, high-throughput video monitoring systems**.
-
-
-## Memory Usage Summary
-
-### Long-Term Memory Module Overview
-
-The Feedback-Attention Memory (FAM) module maintains a **high-capacity but bounded memory** representing **1–2 minutes of past behavioural context**.
-Memory size is fixed per stream, ensuring stable GPU usage during long-duration inference.
-
-
-## Memory Queue Specifications
-
-### Memory Token Size
-
-* Number of memory tokens per clip: **128**
-* Token dimension: **768**
-* Memory per clip (including intermediate attention buffers):
-
-Approximately **120–150 MB per clip**, depending on transformer depth and precision.
 
 ## Total Memory Queue Size
 
