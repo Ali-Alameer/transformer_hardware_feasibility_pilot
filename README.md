@@ -78,8 +78,6 @@ Despite the increased memory capacity, the computation remains tractable due to 
 * **Bounded and predictable VRAM usage**
 * **Streaming-compatible**, supporting hours-long video streams
 * **Configurable memory–accuracy trade-off**
-* **No accumulation of unbounded activations**
-* Well-suited for **datacenter-scale GPUs (e.g., 80–96 GB VRAM)**
 
 
 ## Inference Mode VRAM Breakdown (Per Stream)
@@ -92,15 +90,6 @@ Despite the increased memory capacity, the computation remains tractable due to 
 | **Total per stream**             | **~2.5–3.5 GB**          |
 
 
-## Why Memory Stays Constant
-
-* Clip size is fixed at **32 frames**
-* Batch size per stream is **1**
-* Memory queue length is fixed (`L_mem`)
-* No dynamic feature caching
-* No growing hidden states, unlike recurrent neural networks
-
-**As a result, GPU memory remains constant during 30+ minutes of continuous streaming.**
 
 ## Memory Lifetime
 
